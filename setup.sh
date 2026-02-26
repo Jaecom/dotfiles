@@ -49,7 +49,13 @@ ln -sf "$DOTFILES_DIR/.zshrc" ~/.zshrc
 echo "Symlinking .p10k.zsh..."
 ln -sf "$DOTFILES_DIR/.p10k.zsh" ~/.p10k.zsh
 
-# 7. Install nvm
+# 7. Symlink Claude config
+echo "Symlinking Claude config..."
+mkdir -p ~/.claude/scripts
+ln -sf "$DOTFILES_DIR/.claude/settings.json" ~/.claude/settings.json
+ln -sf "$DOTFILES_DIR/.claude/scripts/context-bar.sh" ~/.claude/scripts/context-bar.sh
+
+# 8. Install nvm
 if [ ! -d "$HOME/.nvm" ]; then
   echo "Installing nvm..."
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
