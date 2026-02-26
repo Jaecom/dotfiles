@@ -54,6 +54,11 @@ echo "Symlinking Claude config..."
 mkdir -p ~/.claude/scripts
 ln -sf "$DOTFILES_DIR/.claude/settings.json" ~/.claude/settings.json
 ln -sf "$DOTFILES_DIR/.claude/scripts/context-bar.sh" ~/.claude/scripts/context-bar.sh
+for skill_dir in "$DOTFILES_DIR"/.claude/skills/*/; do
+  skill_name=$(basename "$skill_dir")
+  mkdir -p ~/.claude/skills/"$skill_name"
+  ln -sf "$skill_dir"SKILL.md ~/.claude/skills/"$skill_name"/SKILL.md
+done
 
 # 8. Install nvm
 if [ ! -d "$HOME/.nvm" ]; then
