@@ -131,6 +131,7 @@ export PATH="$HOME/.local/bin:$PATH"
 alias c='claude'
 alias ch='claude --chrome'
 alias co='code'
+alias vim='nvim'
 export PATH=$PATH:$HOME/.maestro/bin
 export JAVA_HOME=$(/usr/libexec/java_home)
 export PATH=$JAVA_HOME/bin:$PATH
