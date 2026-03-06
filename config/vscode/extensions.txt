@@ -1,0 +1,15 @@
+amazonwebservices.aws-toolkit-vscode
+anthropic.claude-code
+eamodio.gitlens
+esbenp.prettier-vscode
+github.copilot
+github.copilot-chat
+github.vscode-github-actions
+leetcode.vscode-leetcode
+mhutchie.git-graph
+ms-python.debugpy
+ms-python.python
+ms-python.vscode-pylance
+ms-python.vscode-python-envs
+pkief.material-icon-theme
+t3dotgg.vsc-material-theme-but-i-wont-sue-you

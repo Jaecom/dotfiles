@@ -1,0 +1,37 @@
+// Place your key bindings in this file to override the defaults
+[
+    {
+        "key": "ctrl+shift+f",
+        "command": "welcome.showNewFileEntries"
+    },
+    {
+        "key": "ctrl+alt+cmd+n",
+        "command": "-welcome.showNewFileEntries"
+    },
+    {
+        "key": "ctrl+shift+alt+f",
+        "command": "workbench.files.action.createFolderFromExplorer"
+    },
+    {
+        "key": "ctrl+shift+f",
+        "command": "explorer.newFile"
+    },
+    {
+        "key": "ctrl+shift+alt+f",
+        "command": "explorer.newFolder"
+    },
+    {
+        "key": "shift+enter",
+        "command": "editor.action.insertLineAfter",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "cmd+enter",
+        "command": "-editor.action.insertLineAfter",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "cmd+enter",
+        "command": "python.execInTerminal-icon"
+    }
+]

@@ -27,6 +27,14 @@ for skill_dir in "$CONFIG_DIR"/.claude/skills/*/; do
   ln -sf "$skill_dir"SKILL.md ~/.claude/skills/"$skill_name"/SKILL.md
 done
 
+# VS Code settings
+VSCODE_USER_DIR="$HOME/Library/Application Support/Code/User"
+if [ -d "$VSCODE_USER_DIR" ]; then
+  echo "Symlinking VS Code settings..."
+  ln -sf "$CONFIG_DIR/vscode/settings.json" "$VSCODE_USER_DIR/settings.json"
+  ln -sf "$CONFIG_DIR/vscode/keybindings.json" "$VSCODE_USER_DIR/keybindings.json"
+fi
+
 if [[ -z "$DOTFILES_QUIET" ]]; then
   echo ""
   echo "=== Config files updated! ==="

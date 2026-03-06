@@ -54,10 +54,26 @@ else
   echo "pnpm already installed."
 fi
 
-# 7. Neovim config
+# 7. VS Code
+if ! brew list --cask visual-studio-code &>/dev/null; then
+  echo "Installing VS Code..."
+  brew install --cask visual-studio-code
+else
+  echo "VS Code already installed."
+fi
+
+# Install VS Code extensions
+if command -v code &>/dev/null; then
+  echo "Installing VS Code extensions..."
+  while IFS= read -r ext; do
+    code --install-extension "$ext" --force 2>/dev/null
+  done < "$DOTFILES_DIR/config/vscode/extensions.txt"
+fi
+
+# 8. Neovim config
 DOTFILES_QUIET=1 bash "$DOTFILES_DIR/scripts/install-server.sh"
 
-# 8. Config files
+# 9. Config files
 DOTFILES_QUIET=1 bash "$DOTFILES_DIR/scripts/update-config.sh"
 
 echo ""
