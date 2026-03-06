@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "=== Server Setup ==="
+[[ -z "$DOTFILES_QUIET" ]] && echo "=== Server Setup ==="
 
 # Install Neovim config
 NVIM_DIR="$HOME/.config/nvim"
@@ -12,5 +12,7 @@ else
   echo "Neovim config already installed."
 fi
 
-echo ""
-echo "=== Server setup complete! ==="
+if [[ -z "$DOTFILES_QUIET" ]]; then
+  echo ""
+  echo "=== Server setup complete! ==="
+fi
