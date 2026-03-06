@@ -24,9 +24,11 @@ If there are no changes at all, STOP and tell the user there is nothing to commi
 
 ## Phase 2: Ask All Questions (single AskUserQuestion call)
 
-Use **one `AskUserQuestion` call** with up to 3 questions. Gather all info from Phase 1 to build the options.
+**CRITICAL:** Use exactly **one `AskUserQuestion` call** with all questions combined into the `questions` array. Do NOT call `AskUserQuestion` multiple times. This gives the user a tabbed interface where they can navigate between questions before confirming.
 
-### Question 1 — Branch
+Build 2-3 questions (depending on context) with these headers and options:
+
+### Question 1 — header: `"Branch"`
 
 - **If on a feature branch** (not `main`, `master`, `dev`, `develop`):
   - Option 1: `Stay on <current>` — mark as **(Recommended)**
@@ -35,12 +37,12 @@ Use **one `AskUserQuestion` call** with up to 3 questions. Gather all info from 
   - Options 1-2: Generate 2-3 branch names based on the changes (first is **(Recommended)**)
   - Last option: `Stay on <current>`
 
-### Question 2 — Push
+### Question 2 — header: `"Push"`
 
 - Option 1: `Push to origin` **(Recommended)**
 - Option 2: `Skip`
 
-### Question 3 — Merge
+### Question 3 — header: `"Merge"`
 
 Only include this question if the user is on (or will be on) a non-default branch. Detect available target branches from `git branch -r` (look for `main`, `master`, `dev`, `develop`, `sandbox`, `staging`).
 
