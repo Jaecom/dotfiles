@@ -2,7 +2,7 @@
 name: cc
 description: Create a well-structured conventional commit from staged/unstaged changes
 user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash(git *)
+allowed-tools: Read, Grep, Glob, Bash(git *), AskUserQuestion
 ---
 
 # Create Commit
@@ -23,8 +23,8 @@ You are creating a commit. Execute all steps without asking for confirmation unl
   1. Currently on a default/shared branch (`main`, `master`, `dev`, `develop`).
   2. The current changes are clearly unrelated to the current branch name (e.g., branch is `fix/login-bug` but changes are adding a new payments feature).
 - If a new branch is needed:
-  - Analyze the changes and suggest a branch name using `feat/`, `fix/`, `refactor/`, `chore/` convention (e.g., `feat/add-user-auth`, `fix/login-redirect`).
-  - **Ask the user to confirm or provide an alternative branch name.** This is the only interactive step.
+  - Analyze the changes and generate 2-3 candidate branch names using the `feat/`, `fix/`, `refactor/`, `chore/` convention.
+  - **Use the `AskUserQuestion` tool** to present the branch name options as selectable choices (the user can also pick "Other" to type a custom name). Put the recommended option first with "(Recommended)" in the label. Use header "Branch" and phrase the question as "Which branch name would you like to use?".
   - Create and switch: `git checkout -b <branch-name>`.
 - If the current branch is appropriate for the changes, continue.
 
@@ -49,7 +49,7 @@ Use **Conventional Commits** format WITHOUT parenthesized scopes:
 - **No parenthesized scopes.** Write `feat: add storage layer` NOT `feat(storage): add storage layer`.
 - **Types:** `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `perf`, `ci`, `build`, `revert`
 - **Summary:** imperative mood, lowercase, no period, under 72 characters.
-- Do not create a description for the commit message 
+- Do not create a description for the commit message
 - Add `BREAKING CHANGE:` footer if applicable.
 
 ### Examples

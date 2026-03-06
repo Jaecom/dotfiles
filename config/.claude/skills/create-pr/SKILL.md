@@ -2,7 +2,7 @@
 name: cpr
 description: Commit changes grouped by feature, push, and create a draft pull request
 user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash(git _), Bash(gh pr _)
+allowed-tools: Read, Grep, Glob, Bash(git _), Bash(gh pr _), AskUserQuestion
 ---
 
 # Create Pull Request
@@ -18,8 +18,8 @@ You are creating a pull request. Execute all steps without asking for confirmati
   - If there are **no uncommitted changes**, STOP and tell the user there is nothing to commit or push.
   - If there **are uncommitted changes**:
     - Run `git diff` and `git diff --staged` to review all changes (this review carries into Step 2 — do not re-run diffs).
-    - Analyze the changes and suggest a branch name using the convention `feat/`, `fix/`, `refactor/`, `chore/`, etc. (e.g., `feat/add-user-auth`, `fix/login-redirect`).
-    - **Ask the user to confirm or provide an alternative branch name.** This is the only interactive step.
+    - Analyze the changes and generate 2-3 candidate branch names using the convention `feat/`, `fix/`, `refactor/`, `chore/`, etc.
+    - **Use the `AskUserQuestion` tool** to present the branch name options as selectable choices (the user can also pick "Other" to type a custom name). Put the recommended option first with "(Recommended)" in the label. Use header "Branch" and phrase the question as "Which branch name would you like to use?".
     - Once confirmed, create and switch to the new branch: `git checkout -b <branch-name>`.
 - If already on a feature branch:
   - Run `git log <base>..HEAD --oneline` to understand what commits already exist on this branch.
@@ -33,7 +33,7 @@ You are creating a pull request. Execute all steps without asking for confirmati
 - **Group related changes by feature/purpose** into separate commits:
   - Analyze which files are related (e.g., a component and its styles, a service and its types).
   - Stage each group with `git add <specific files>` — never use `git add .` or `git add -A`.
-  - Commit each group with a descriptive conventional commit message (e.g., `feat:`, `fix:`, `refactor:`, `docs:`, `style:`, `chore:`).
+  - Commit each group with a single-line conventional commit message (e.g., `feat:`, `fix:`, `refactor:`, `docs:`, `style:`, `chore:`). Do NOT include a multi-line description body — only the subject line.
 - Do NOT ask for confirmation. Just commit.
 
 ## Step 3: Push to Remote
