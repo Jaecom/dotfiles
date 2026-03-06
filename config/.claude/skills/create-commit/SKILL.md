@@ -1,77 +1,93 @@
 ---
 name: cc
-description: Create a well-structured conventional commit from staged/unstaged changes
+description: Interactive git workflow — commit, push, and merge with step-by-step prompts
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash(git *), AskUserQuestion
 ---
 
 # Create Commit
 
-You are creating a commit. Execute all steps without asking for confirmation unless explicitly noted.
+You are running an interactive git workflow. First gather info, then ask all questions at once, then execute everything.
 
-## Step 1: Assess Changes
+## Phase 1: Gather Info (automatic, no prompts)
 
-- Run `git status`, `git diff`, and `git diff --staged` to understand all changes.
-- Run `git log --oneline -10` to see recent commit style for reference.
-- If there are no changes at all, STOP and tell the user there is nothing to commit.
+Run all of these in parallel:
+- `git status`
+- `git diff`
+- `git diff --staged`
+- `git log --oneline -10`
+- `git branch --show-current`
+- `git remote show origin | grep 'HEAD branch'`
+- `git branch -r`
 
-## Step 2: Branch Check
+If there are no changes at all, STOP and tell the user there is nothing to commit.
 
-- Run `git branch --show-current` to get the current branch.
-- Detect the default branch: `git remote show origin | grep 'HEAD branch'` — store as `<default>`.
-- **Create a new branch if either condition is true:**
-  1. Currently on a default/shared branch (`main`, `master`, `dev`, `develop`).
-  2. The current changes are clearly unrelated to the current branch name (e.g., branch is `fix/login-bug` but changes are adding a new payments feature).
-- If a new branch is needed:
-  - Analyze the changes and generate 2-3 candidate branch names using the `feat/`, `fix/`, `refactor/`, `chore/` convention.
-  - **Use the `AskUserQuestion` tool** to present the branch name options as selectable choices (the user can also pick "Other" to type a custom name). Put the recommended option first with "(Recommended)" in the label. Use header "Branch" and phrase the question as "Which branch name would you like to use?".
-  - Create and switch: `git checkout -b <branch-name>`.
-- If the current branch is appropriate for the changes, continue.
+## Phase 2: Ask All Questions (single AskUserQuestion call)
 
-## Step 3: Stage Changes
+Use **one `AskUserQuestion` call** with up to 3 questions. Gather all info from Phase 1 to build the options.
 
-- If there are already staged changes and no unstaged changes, skip to Step 4.
-- If there are unstaged changes, stage them intelligently:
-  - **Group related changes** by feature/purpose into separate commits if the changes span multiple unrelated concerns.
-  - Stage with `git add <specific files>` — never use `git add .` or `git add -A`.
-  - If ALL changes are related to a single concern, stage everything together.
+### Question 1 — Branch
 
-## Step 4: Write Commit Message
+- **If on a feature branch** (not `main`, `master`, `dev`, `develop`):
+  - Option 1: `Stay on <current>` — mark as **(Recommended)**
+  - Options 2-3: Generate 2 alternative branch names based on the changes (using `feat/`, `fix/`, `refactor/`, `chore/` convention)
+- **If on a default/shared branch** (`main`, `master`, `dev`, `develop`):
+  - Options 1-2: Generate 2-3 branch names based on the changes (first is **(Recommended)**)
+  - Last option: `Stay on <current>`
 
-Use **Conventional Commits** format WITHOUT parenthesized scopes:
+### Question 2 — Push
+
+- Option 1: `Push to origin` **(Recommended)**
+- Option 2: `Skip`
+
+### Question 3 — Merge
+
+Only include this question if the user is on (or will be on) a non-default branch. Detect available target branches from `git branch -r` (look for `main`, `master`, `dev`, `develop`, `sandbox`, `staging`).
+
+- One option per available target branch (e.g., `Merge into main`, `Merge into dev`)
+- The default branch option is **(Recommended)**
+- Last option: `Skip`
+
+If the user will stay on the default branch (from Question 1), omit this question entirely.
+
+## Phase 3: Execute (automatic, no prompts)
+
+Execute everything based on the user's answers, in order:
+
+### 3a: Branch
+- If a new branch was chosen: `git checkout -b <branch-name>`
+
+### 3b: Stage & Commit
+- Group related changes by feature/purpose.
+- Stage with `git add <specific files>` — never use `git add .` or `git add -A`.
+- Write commit messages using **Conventional Commits** format:
 
 ```
 <type>: <short summary>
 ```
 
-### Rules
+#### Commit rules
 
 - **No parenthesized scopes.** Write `feat: add storage layer` NOT `feat(storage): add storage layer`.
 - **Types:** `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `perf`, `ci`, `build`, `revert`
 - **Summary:** imperative mood, lowercase, no period, under 72 characters.
-- Do not create a description for the commit message
+- No description/body in the commit message.
 - Add `BREAKING CHANGE:` footer if applicable.
-
-### Examples
-
-```
-feat: add user authentication with JWT
-```
-
-```
-fix: prevent duplicate form submissions
-```
-
-```
-refactor: simplify database connection pooling
-
-Replaced custom pool manager with built-in connection pooling
-from the database driver, reducing code and fixing leak on timeout.
-```
-
-## Step 5: Commit
-
 - Create the commit using a HEREDOC for the message.
-- If changes span multiple unrelated concerns, create multiple focused commits (repeat Steps 3-4 for each group).
-- Run `git status` after committing to verify success.
-- Show the user a summary of what was committed.
+- If changes span multiple unrelated concerns, create multiple focused commits (repeat stage + commit for each group).
+
+### 3c: Push
+- If user chose Push: `git push -u origin HEAD`
+- If user chose Skip: skip push. Also skip merge regardless of merge answer.
+
+### 3d: Merge
+- Only if push happened AND merge target was selected (not Skip).
+- `git checkout <target> && git merge <feature-branch> && git push origin <target>`
+- Switch back to the feature branch: `git checkout <feature-branch>`
+
+## Phase 4: Summary
+
+Show a concise summary of what was done:
+- What was committed (files, message)
+- Whether it was pushed
+- Whether it was merged (and into which branch)
