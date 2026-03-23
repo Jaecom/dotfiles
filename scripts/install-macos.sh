@@ -54,7 +54,15 @@ else
   echo "pnpm already installed."
 fi
 
-# 7. VS Code
+# 7. Karabiner-Elements
+if ! brew list --cask karabiner-elements &>/dev/null; then
+  echo "Installing Karabiner-Elements..."
+  brew install --cask karabiner-elements
+else
+  echo "Karabiner-Elements already installed."
+fi
+
+# 8. VS Code
 if ! brew list --cask visual-studio-code &>/dev/null; then
   echo "Installing VS Code..."
   brew install --cask visual-studio-code
@@ -70,10 +78,10 @@ if command -v code &>/dev/null; then
   done < "$DOTFILES_DIR/config/vscode/extensions.txt"
 fi
 
-# 8. Neovim config
+# 9. Neovim config
 DOTFILES_QUIET=1 bash "$DOTFILES_DIR/scripts/install-server.sh"
 
-# 9. Config files
+# 10. Config files
 DOTFILES_QUIET=1 bash "$DOTFILES_DIR/scripts/update-config.sh"
 
 echo ""
