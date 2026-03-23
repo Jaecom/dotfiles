@@ -35,7 +35,7 @@ else
   echo "Neovim config already installed."
 fi
 
-# Add vim alias to point to nvim
+# Add vim alias and sudo alias expansion to point to nvim
 for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
   if [ -f "$SHELL_RC" ]; then
     if ! grep -q 'alias vim=.*nvim' "$SHELL_RC" 2>/dev/null; then
@@ -43,6 +43,12 @@ for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
       echo 'alias vim="nvim"' >> "$SHELL_RC"
     else
       echo "vim → nvim alias already set in $SHELL_RC."
+    fi
+    if ! grep -q "alias sudo='sudo '" "$SHELL_RC" 2>/dev/null; then
+      echo "Adding sudo alias expansion to $SHELL_RC..."
+      echo "alias sudo='sudo '" >> "$SHELL_RC"
+    else
+      echo "sudo alias expansion already set in $SHELL_RC."
     fi
   fi
 done
