@@ -29,12 +29,10 @@ for skill_dir in "$CONFIG_DIR"/.claude/skills/*/; do
   ln -sf "$skill_dir"SKILL.md ~/.claude/skills/"$skill_name"/SKILL.md
 done
 
-# Karabiner config
-if brew list --cask karabiner-elements &>/dev/null; then
-  echo "Symlinking Karabiner config..."
-  mkdir -p ~/.config/karabiner
-  ln -sf "$CONFIG_DIR/karabiner/karabiner.json" ~/.config/karabiner/karabiner.json
-fi
+# Karabiner config (copy instead of symlink — Karabiner rewrites this file and doesn't work with symlinks)
+echo "Copying Karabiner config..."
+mkdir -p ~/.config/karabiner
+cp "$CONFIG_DIR/karabiner/karabiner.json" ~/.config/karabiner/karabiner.json
 
 # VS Code settings
 VSCODE_USER_DIR="$HOME/Library/Application Support/Code/User"
