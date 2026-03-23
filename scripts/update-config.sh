@@ -6,8 +6,10 @@ CONFIG_DIR="$DOTFILES_DIR/config"
 [[ -z "$DOTFILES_QUIET" ]] && echo "=== Update Config Files ==="
 
 # iTerm2 preferences
-echo "Copying iTerm2 preferences..."
-cp "$CONFIG_DIR/com.googlecode.iterm2.plist" ~/Library/Preferences/com.googlecode.iterm2.plist
+if brew list --cask iterm2 &>/dev/null; then
+  echo "Copying iTerm2 preferences..."
+  cp "$CONFIG_DIR/com.googlecode.iterm2.plist" ~/Library/Preferences/com.googlecode.iterm2.plist
+fi
 
 # Symlink dotfiles
 echo "Symlinking .zshrc..."
@@ -28,9 +30,11 @@ for skill_dir in "$CONFIG_DIR"/.claude/skills/*/; do
 done
 
 # Karabiner config
-echo "Symlinking Karabiner config..."
-mkdir -p ~/.config/karabiner
-ln -sf "$CONFIG_DIR/karabiner/karabiner.json" ~/.config/karabiner/karabiner.json
+if brew list --cask karabiner-elements &>/dev/null; then
+  echo "Symlinking Karabiner config..."
+  mkdir -p ~/.config/karabiner
+  ln -sf "$CONFIG_DIR/karabiner/karabiner.json" ~/.config/karabiner/karabiner.json
+fi
 
 # VS Code settings
 VSCODE_USER_DIR="$HOME/Library/Application Support/Code/User"

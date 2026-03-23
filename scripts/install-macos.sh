@@ -14,7 +14,7 @@ else
 fi
 
 # 2. Install iTerm2
-if ! brew list --cask iterm2 &>/dev/null; then
+if [ ! -d "/Applications/iTerm.app" ]; then
   echo "Installing iTerm2..."
   brew install --cask iterm2
 else
@@ -55,7 +55,7 @@ else
 fi
 
 # 7. Karabiner-Elements
-if ! brew list --cask karabiner-elements &>/dev/null; then
+if [ ! -d "/Applications/Karabiner-Elements.app" ]; then
   echo "Installing Karabiner-Elements..."
   brew install --cask karabiner-elements
 else
@@ -63,7 +63,7 @@ else
 fi
 
 # 8. VS Code
-if ! brew list --cask visual-studio-code &>/dev/null; then
+if [ ! -d "/Applications/Visual Studio Code.app" ]; then
   echo "Installing VS Code..."
   brew install --cask visual-studio-code
 else
