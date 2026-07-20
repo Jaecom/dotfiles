@@ -31,8 +31,22 @@ if [ ! -d "$NVIM_DIR" ]; then
   echo "Cloning Neovim config..."
   mkdir -p "$HOME/.config"
   git clone https://github.com/Jaecom/nvim.git "$NVIM_DIR"
+  echo "Installing Neovim plugins for current user..."
+  nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
 else
   echo "Neovim config already installed."
+fi
+
+# Install Neovim config for root so sudo nvim uses the same config
+ROOT_NVIM_DIR="/root/.config/nvim"
+if ! sudo test -d "$ROOT_NVIM_DIR" 2>/dev/null; then
+  echo "Cloning Neovim config for root..."
+  sudo mkdir -p "/root/.config"
+  sudo git clone https://github.com/Jaecom/nvim.git "$ROOT_NVIM_DIR"
+  echo "Installing Neovim plugins for root..."
+  sudo nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
+else
+  echo "Neovim config already installed for root."
 fi
 
 # Add vim alias and sudo alias expansion to point to nvim
