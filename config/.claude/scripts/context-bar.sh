@@ -118,7 +118,6 @@ if [[ -n "$transcript_path" && -f "$transcript_path" ]]; then
     # 20k baseline: includes system prompt (~3k), tools (~15k), memory (~300),
     # plus ~2k for git status, env block, XML framing, and other dynamic context
     baseline=20000
-    bar_width=10
 
     if [[ "$context_length" -gt 0 ]]; then
         pct=$((context_length * 100 / max_context))
@@ -132,33 +131,30 @@ if [[ -n "$transcript_path" && -f "$transcript_path" ]]; then
     [[ $pct -gt 100 ]] && pct=100
 
     bar=""
-    for ((i=0; i<bar_width; i++)); do
-        bar_start=$((i * 10))
-        progress=$((pct - bar_start))
-        if [[ $progress -ge 8 ]]; then
+    for ((i=0; i<5; i++)); do
+        progress=$((pct - i * 20))
+        if [[ $progress -ge 15 ]]; then
             bar+="${C_ACCENT}█${C_RESET}"
-        elif [[ $progress -ge 3 ]]; then
+        elif [[ $progress -ge 5 ]]; then
             bar+="${C_ACCENT}▄${C_RESET}"
         else
             bar+="${C_BAR_EMPTY}░${C_RESET}"
         fi
     done
 
-    ctx="${bar} ${C_GRAY}${pct_prefix}${pct}% of ${max_k}k tokens"
+    ctx="${bar} ${C_GRAY}${pct_prefix}${pct}% (${max_k}k)"
 else
     # Transcript not available yet - show baseline estimate
     baseline=20000
-    bar_width=10
     pct=$((baseline * 100 / max_context))
     [[ $pct -gt 100 ]] && pct=100
 
     bar=""
-    for ((i=0; i<bar_width; i++)); do
-        bar_start=$((i * 10))
-        progress=$((pct - bar_start))
-        if [[ $progress -ge 8 ]]; then
+    for ((i=0; i<5; i++)); do
+        progress=$((pct - i * 20))
+        if [[ $progress -ge 15 ]]; then
             bar+="${C_ACCENT}█${C_RESET}"
-        elif [[ $progress -ge 3 ]]; then
+        elif [[ $progress -ge 5 ]]; then
             bar+="${C_ACCENT}▄${C_RESET}"
         else
             bar+="${C_BAR_EMPTY}░${C_RESET}"
@@ -168,19 +164,83 @@ else
     ctx="${bar} ${C_GRAY}~${pct}% of ${max_k}k tokens"
 fi
 
-# Build output: Model | Dir | Branch (uncommitted) | Context
-output="${C_ACCENT}${model}${C_GRAY} | 📁 ${dir}"
-[[ -n "$branch" ]] && output+=" | 🔀 ${branch} ${git_status}"
-output+=" | ${ctx}${C_RESET}"
+# Build rate limit bars from statusLine JSON (subscription usage)
+five_hour_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+five_hour_resets=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+seven_day_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
 
-printf '%b\n' "$output"
+five_hour_str=""
+if [[ -n "$five_hour_pct" ]]; then
+    if [[ "$five_hour_pct" -ge 80 ]]; then
+        C_RATE='\033[38;5;196m'
+    elif [[ "$five_hour_pct" -ge 60 ]]; then
+        C_RATE='\033[38;5;214m'
+    else
+        C_RATE="$C_ACCENT"
+    fi
+
+    bar_5h=""
+    for ((i=0; i<5; i++)); do
+        progress=$((five_hour_pct - i * 20))
+        if [[ $progress -ge 15 ]]; then
+            bar_5h+="${C_RATE}█${C_RESET}"
+        elif [[ $progress -ge 5 ]]; then
+            bar_5h+="${C_RATE}▄${C_RESET}"
+        else
+            bar_5h+="${C_BAR_EMPTY}░${C_RESET}"
+        fi
+    done
+
+    reset_str=""
+    if [[ -n "$five_hour_resets" ]]; then
+        now=$(date +%s)
+        left=$((five_hour_resets - now))
+        if [[ $left -gt 0 ]]; then
+            h=$((left / 3600))
+            m=$(( (left % 3600) / 60 ))
+            [[ $h -gt 0 ]] && reset_str=" (resets ${h}h ${m}m)" || reset_str=" (resets ${m}m)"
+        fi
+    fi
+
+    five_hour_str="${bar_5h} ${C_GRAY}5h ${five_hour_pct}%${reset_str}"
+fi
+
+seven_day_str=""
+if [[ -n "$seven_day_pct" ]]; then
+    bar_7d=""
+    for ((i=0; i<5; i++)); do
+        progress=$((seven_day_pct - i * 20))
+        if [[ $progress -ge 15 ]]; then
+            bar_7d+="${C_ACCENT}█${C_RESET}"
+        elif [[ $progress -ge 5 ]]; then
+            bar_7d+="${C_ACCENT}▄${C_RESET}"
+        else
+            bar_7d+="${C_BAR_EMPTY}░${C_RESET}"
+        fi
+    done
+    seven_day_str="${bar_7d} ${C_GRAY}7d ${seven_day_pct}%"
+fi
+
+# Line 1: Model | Dir | Branch (git_status)
+line1="${C_ACCENT}${model}${C_GRAY} | 📁 ${dir}"
+[[ -n "$branch" ]] && line1+=" | 🔀 ${branch} ${git_status}"
+line1+="${C_RESET}"
+
+# Line 2: indented to align with content after model name, then context · 5h · 7d
+indent=$(printf '%*s' $((${#model} + 1)) '')
+line2="${C_GRAY}${indent}| ${C_RESET}${ctx}"
+[[ -n "$five_hour_str" ]] && line2+="${C_GRAY} | ${C_RESET}${five_hour_str}"
+[[ -n "$seven_day_str" ]] && line2+="${C_GRAY} | ${C_RESET}${seven_day_str}"
+line2+="${C_RESET}"
+
+printf '%b\n' "$line1"
+printf '%b\n' "$line2"
 
 # Get user's last message (text only, not tool results, skip unhelpful messages)
 if [[ -n "$transcript_path" && -f "$transcript_path" ]]; then
     # Calculate visible length (without ANSI codes) - 10 chars for bar + content
     plain_output="${model} | 📁${dir}"
     [[ -n "$branch" ]] && plain_output+=" | 🔀${branch} ${git_status}"
-    plain_output+=" | xxxxxxxxxx ${pct}% of ${max_k}k tokens"
     max_len=${#plain_output}
     last_user_msg=$(jq -rs '
         # Messages to skip (not useful as context)
