@@ -50,25 +50,24 @@ else
 fi
 
 # Add vim alias and sudo alias expansion to point to nvim
-for SHELL_RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
-  if [ -f "$SHELL_RC" ]; then
-    if ! grep -q 'alias vim=.*nvim' "$SHELL_RC" 2>/dev/null; then
-      echo "Adding vim → nvim alias to $SHELL_RC..."
-      echo 'alias vim="nvim"' >> "$SHELL_RC"
-    else
-      echo "vim → nvim alias already set in $SHELL_RC."
-    fi
-    if ! grep -q "alias sudo='sudo '" "$SHELL_RC" 2>/dev/null; then
-      echo "Adding sudo alias expansion to $SHELL_RC..."
-      echo "alias sudo='sudo '" >> "$SHELL_RC"
-    else
-      echo "sudo alias expansion already set in $SHELL_RC."
-    fi
+SHELL_RC="$HOME/.bashrc"
+if [ -f "$SHELL_RC" ]; then
+  if ! grep -q 'alias vim=.*nvim' "$SHELL_RC" 2>/dev/null; then
+    echo "Adding vim → nvim alias to $SHELL_RC..."
+    echo 'alias vim="nvim"' >> "$SHELL_RC"
+  else
+    echo "vim → nvim alias already set in $SHELL_RC."
   fi
-done
+  if ! grep -q "alias sudo='sudo '" "$SHELL_RC" 2>/dev/null; then
+    echo "Adding sudo alias expansion to $SHELL_RC..."
+    echo "alias sudo='sudo '" >> "$SHELL_RC"
+  else
+    echo "sudo alias expansion already set in $SHELL_RC."
+  fi
+fi
 
 if [[ -z "$DOTFILES_QUIET" ]]; then
   echo ""
   echo "=== Server setup complete! ==="
-  echo "Restart your shell or run: source $SHELL_RC"
+  echo "Restart your shell or run: source ~/.bashrc"
 fi
