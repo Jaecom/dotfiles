@@ -18,6 +18,11 @@ ln -sf "$CONFIG_DIR/.zshrc" ~/.zshrc
 echo "Symlinking .p10k.zsh..."
 ln -sf "$CONFIG_DIR/.p10k.zsh" ~/.p10k.zsh
 
+# Dialect for the sqlfluff formatter wired up in vscode/settings.json — without
+# it sqlfluff defaults to ansi and flags ordinary Postgres syntax on every save.
+echo "Symlinking .sqlfluff..."
+ln -sf "$CONFIG_DIR/.sqlfluff" ~/.sqlfluff
+
 # Symlink Claude config
 echo "Symlinking Claude config..."
 mkdir -p ~/.claude/scripts
@@ -33,6 +38,20 @@ done
 echo "Copying Karabiner config..."
 mkdir -p ~/.config/karabiner
 cp "$CONFIG_DIR/karabiner/karabiner.json" ~/.config/karabiner/karabiner.json
+
+# Rectangle config (defaults import, not a symlink — macOS preference plists are
+# owned by cfprefsd, which ignores a plain copy). Rectangle has to be stopped
+# first: a running app is served cfprefsd's cached values and rewrites the whole
+# domain when it quits, silently discarding the import.
+# Note: import REPLACES the whole domain, so any Rectangle setting changed on
+# this machine and not captured in the repo plist is discarded.
+if [ -d "/Applications/Rectangle.app" ]; then
+  echo "Importing Rectangle config..."
+  RECTANGLE_RUNNING=""
+  pkill -x Rectangle 2>/dev/null && RECTANGLE_RUNNING=1 && sleep 1
+  defaults import com.knollsoft.Rectangle "$CONFIG_DIR/rectangle/com.knollsoft.Rectangle.plist"
+  [ -n "$RECTANGLE_RUNNING" ] && open -a Rectangle
+fi
 
 # VS Code settings
 VSCODE_USER_DIR="$HOME/Library/Application Support/Code/User"

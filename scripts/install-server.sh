@@ -49,21 +49,32 @@ else
   echo "Neovim config already installed for root."
 fi
 
-# Add vim alias and sudo alias expansion to point to nvim
+# Install gopls if Go is present, so Neovim's LSP works for Go over ssh.
+# Checked by path, not PATH — GOBIN usually isn't on it yet at this point.
+if command -v go &>/dev/null; then
+  export GOBIN="$(go env GOPATH)/bin"
+  if [ -x "$GOBIN/gopls" ]; then
+    echo "gopls already installed."
+  else
+    echo "Installing gopls..."
+    go install golang.org/x/tools/gopls@latest
+  fi
+fi
+
+# Shell setup: nvim aliases, plus GOBIN on PATH so Neovim can actually launch
+# the gopls installed above.
 SHELL_RC="$HOME/.bashrc"
+
+append_once() {
+  grep -qF "$1" "$SHELL_RC" 2>/dev/null && return
+  echo "Adding to $SHELL_RC: $1"
+  echo "$1" >> "$SHELL_RC"
+}
+
 if [ -f "$SHELL_RC" ]; then
-  if ! grep -q 'alias vim=.*nvim' "$SHELL_RC" 2>/dev/null; then
-    echo "Adding vim → nvim alias to $SHELL_RC..."
-    echo 'alias vim="nvim"' >> "$SHELL_RC"
-  else
-    echo "vim → nvim alias already set in $SHELL_RC."
-  fi
-  if ! grep -q "alias sudo='sudo '" "$SHELL_RC" 2>/dev/null; then
-    echo "Adding sudo alias expansion to $SHELL_RC..."
-    echo "alias sudo='sudo '" >> "$SHELL_RC"
-  else
-    echo "sudo alias expansion already set in $SHELL_RC."
-  fi
+  append_once 'alias vim="nvim"'
+  append_once "alias sudo='sudo '"
+  [ -n "$GOBIN" ] && append_once "export PATH=\"\$PATH:$GOBIN\""
 fi
 
 if [[ -z "$DOTFILES_QUIET" ]]; then

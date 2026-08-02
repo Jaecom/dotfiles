@@ -119,19 +119,47 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # pnpm
-export PNPM_HOME="/Users/jae/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
-alias python="/opt/homebrew/bin/python3"
+alias python="python3"
 export PATH="$HOME/.local/bin:$PATH"
 
-alias c='claude'
-alias ch='claude --chrome'
+# --allow-dangerously-skip-permissions makes bypass mode selectable in the
+# shift+tab permission cycle without enabling it by default
+alias c='claude --allow-dangerously-skip-permissions'
+alias ch='claude --chrome --allow-dangerously-skip-permissions'
 alias co='code'
 alias vim='nvim'
 export PATH=$PATH:$HOME/.maestro/bin
-export JAVA_HOME=$(/usr/libexec/java_home)
-export PATH=$JAVA_HOME/bin:$PATH
+
+# Gradle and Maestro read JAVA_HOME, so JAVA_HOME and PATH must resolve to the
+# same JDK — set them together, never separately. Pinned to 21: java_home
+# otherwise picks the newest installed JDK, which runs ahead of Gradle support.
+JAVA_HOME=$(/usr/libexec/java_home -v 21 2>/dev/null)
+if [ -z "$JAVA_HOME" ]; then
+  # Fallback for when the keg wasn't linked into /Library/Java (needs sudo).
+  for _brew in /opt/homebrew /usr/local; do
+    [ -d "$_brew/opt/openjdk@21" ] &&
+      JAVA_HOME="$_brew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home" && break
+  done
+  unset _brew
+fi
+if [ -n "$JAVA_HOME" ]; then
+  export JAVA_HOME
+  export PATH="$JAVA_HOME/bin:$PATH"
+fi
+
+export PATH="$HOME/go/bin:$PATH"
+export LC_MESSAGES=C
+# pip --user installs land in a version-numbered dir; glob it so a macOS Python
+# version bump doesn't silently strand this PATH entry. Appended, not prepended:
+# these live under Apple's Python 3.9 and must not shadow a Homebrew binary of
+# the same name (sqlfluff is installed both ways on older machines).
+for _pybin in "$HOME"/Library/Python/*/bin(N); do
+  export PATH="$PATH:$_pybin"
+done
+unset _pybin

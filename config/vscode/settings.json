@@ -58,19 +58,26 @@
   "workbench.colorTheme": "Material Theme Darker",
   "leetcode.workspaceFolder": "/Users/jae/.leetcode",
   "leetcode.defaultLanguage": "python3",
-  "github.copilot.enable": {
-    "*": true,
-    "python3": false,
-    "python": false,
-  },
   "leetcode.showDescription": "In Webview",
   "leetcode.hint.commentDescription": false,
   "editor.tabSize": 2,
   "files.autoSave": "afterDelay",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
   "typescript.updateImportsOnFileMove.enabled": "always",
-  "gitlens.ai.model": "vscode",
-  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
   "explorer.confirmDelete": false,
+  "claudeCode.preferredLocation": "panel",
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+    },
+  },
+  "gopls": {
+    "formatting.gofumpt": true,
+  },
+  "editor.formatOnSave": true,
+  "[sql]": {
+    "editor.defaultFormatter": "sqlfluff.vscode-sqlfluff"
+  }
 }
