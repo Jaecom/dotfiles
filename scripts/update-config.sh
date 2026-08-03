@@ -34,6 +34,15 @@ for skill_dir in "$CONFIG_DIR"/.claude/skills/*/; do
   ln -sf "$skill_dir"SKILL.md ~/.claude/skills/"$skill_name"/SKILL.md
 done
 
+# Hammerspoon config — Accessibility and Bluetooth permissions must be granted
+# manually via System Settings after first launch; macOS doesn't allow scripting that.
+# Without Bluetooth access, blueutil (spawned as a child of Hammerspoon) aborts
+# silently instead of prompting, so the JBL auto-connect in init.lua just times out.
+echo "Symlinking Hammerspoon config..."
+mkdir -p ~/.hammerspoon
+ln -sf "$CONFIG_DIR/hammerspoon/init.lua" ~/.hammerspoon/init.lua
+NEEDS_HAMMERSPOON_PERMISSIONS=1
+
 # Karabiner config (copy instead of symlink — Karabiner rewrites this file and doesn't work with symlinks)
 echo "Copying Karabiner config..."
 mkdir -p ~/.config/karabiner
@@ -59,6 +68,13 @@ if [ -d "$VSCODE_USER_DIR" ]; then
   echo "Symlinking VS Code settings..."
   ln -sf "$CONFIG_DIR/vscode/settings.json" "$VSCODE_USER_DIR/settings.json"
   ln -sf "$CONFIG_DIR/vscode/keybindings.json" "$VSCODE_USER_DIR/keybindings.json"
+fi
+
+if [[ -n "$NEEDS_HAMMERSPOON_PERMISSIONS" ]]; then
+  echo ""
+  echo "ACTION NEEDED: grant Hammerspoon Accessibility and Bluetooth permission"
+  echo "in System Settings > Privacy & Security (opening Bluetooth pane now)."
+  open "x-apple.systempreferences:com.apple.preference.security?Privacy_Bluetooth" &>/dev/null
 fi
 
 if [[ -z "$DOTFILES_QUIET" ]]; then

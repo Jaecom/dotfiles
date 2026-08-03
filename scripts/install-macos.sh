@@ -130,6 +130,8 @@ brew_cask rectangle "/Applications/Rectangle.app"         # prefs restored by up
 brew_cask raycast "/Applications/Raycast.app"             # settings are cloud-synced
 brew_cask gitkraken "/Applications/GitKraken.app"
 brew_cask notion "/Applications/Notion.app"
+brew_cask hammerspoon "/Applications/Hammerspoon.app" # config restored by update-config.sh
+brew_formula blueutil                                 # CLI Bluetooth control, used by ~/.hammerspoon/init.lua
 
 # 6. VS Code extensions
 if command -v code &>/dev/null; then
