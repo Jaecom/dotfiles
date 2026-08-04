@@ -95,6 +95,9 @@ source $ZSH/oh-my-zsh.sh
 #   export EDITOR='nvim'
 # fi
 
+# Editor psql's \e command opens
+export PSQL_EDITOR=nvim
+
 # Compilation flags
 # export ARCHFLAGS="-arch $(uname -m)"
 
