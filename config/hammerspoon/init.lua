@@ -14,6 +14,8 @@ local hueRoomGroupedLightID = "2434380b-4845-42cd-bcfd-79767e4c02f8" -- Jae's Ro
 local youtubeMusicBundleID = "com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod"
 local hgMonitorName = "HG584T05"
 
+local sidecarIpadName = "J’s iPad" -- curly apostrophe, matches `SidecarLauncher devices` output
+
 local debounced = {}
 local function onceEvery3s(key, action)
     if debounced[key] then return end
@@ -106,6 +108,18 @@ local function pauseAllMedia()
     hs.task.new("/opt/homebrew/bin/nowplaying-cli", nil, { "pause" }):start()
 end
 
+local function connectSidecar()
+    hs.task.new("/opt/homebrew/bin/SidecarLauncher", function(exitCode, stdOut)
+        if exitCode ~= 0 then
+            hs.alert.show("Sidecar: failed to connect to " .. sidecarIpadName)
+        end
+    end, { "connect", sidecarIpadName }):start()
+end
+
+local function disconnectSidecar()
+    hs.task.new("/opt/homebrew/bin/SidecarLauncher", nil, { "disconnect", sidecarIpadName }):start()
+end
+
 usbWatcher = hs.usb.watcher.new(function(event)
     if not (event.productName and event.productName:find(ts5NameFragment, 1, true)) then
         return
@@ -116,11 +130,13 @@ usbWatcher = hs.usb.watcher.new(function(event)
             connectJblAndSwitchOutput()
             recallHueScene(hueRelaxSceneID)
             openAndPositionYoutubeMusic()
+            connectSidecar()
         end)
     elseif event.eventType == "removed" then
         onceEvery3s("removed", function()
             turnOffHueRoom(hueRoomGroupedLightID)
             pauseAllMedia()
+            disconnectSidecar()
         end)
     end
 end)

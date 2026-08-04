@@ -133,6 +133,24 @@ brew_cask notion "/Applications/Notion.app"
 brew_cask hammerspoon "/Applications/Hammerspoon.app" # config restored by update-config.sh
 brew_formula blueutil                                 # CLI Bluetooth control, used by ~/.hammerspoon/init.lua
 
+# SidecarLauncher: CLI Sidecar connect/disconnect (no brew formula), used by
+# ~/.hammerspoon/init.lua. Uses private APIs, so it's pinned to a known-good
+# release rather than always tracking latest.
+SIDECAR_LAUNCHER_BIN="/opt/homebrew/bin/SidecarLauncher"
+if [ -x "$SIDECAR_LAUNCHER_BIN" ]; then
+  echo "SidecarLauncher already installed."
+else
+  echo "Installing SidecarLauncher..."
+  SIDECAR_LAUNCHER_TMP="$(mktemp -d)"
+  curl -fsSL -o "$SIDECAR_LAUNCHER_TMP/SidecarLauncher.zip" \
+    "https://github.com/Ocasio-J/SidecarLauncher/releases/download/1.2/SidecarLauncher.zip"
+  unzip -q "$SIDECAR_LAUNCHER_TMP/SidecarLauncher.zip" -d "$SIDECAR_LAUNCHER_TMP"
+  chmod +x "$SIDECAR_LAUNCHER_TMP/SidecarLauncher"
+  xattr -dr com.apple.quarantine "$SIDECAR_LAUNCHER_TMP/SidecarLauncher" 2>/dev/null
+  mv "$SIDECAR_LAUNCHER_TMP/SidecarLauncher" "$SIDECAR_LAUNCHER_BIN"
+  rm -rf "$SIDECAR_LAUNCHER_TMP"
+fi
+
 # 6. VS Code extensions
 if command -v code &>/dev/null; then
   echo "Installing VS Code extensions..."
