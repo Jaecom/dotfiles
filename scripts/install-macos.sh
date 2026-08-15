@@ -40,6 +40,18 @@ go_tool() {
   fi
 }
 
+# pip_user_package <package> — checked with `pip3 show`, since these install
+# into ~/Library/Python/*/bin, which .zshrc puts on PATH but `command -v`
+# can't see until a new shell picks up that glob.
+pip_user_package() {
+  if pip3 show "$1" &>/dev/null; then
+    echo "$1 already installed."
+  else
+    echo "Installing $1..."
+    pip3 install --user "$1"
+  fi
+}
+
 # 1. Homebrew
 if ! command -v brew &>/dev/null; then
   echo "Installing Homebrew..."
@@ -122,6 +134,11 @@ if command -v go &>/dev/null; then
   go_tool air github.com/air-verse/air@latest
 fi
 
+# Python tools — installed with --user since these are used outside any
+# project virtualenv (test running and coverage diffing from the shell).
+pip_user_package pytest
+pip_user_package diff-cover # also provides the diff-quality command
+
 # 5. Apps
 brew_cask karabiner-elements "/Applications/Karabiner-Elements.app"
 brew_cask visual-studio-code "/Applications/Visual Studio Code.app"
@@ -132,6 +149,18 @@ brew_cask gitkraken "/Applications/GitKraken.app"
 brew_cask notion "/Applications/Notion.app"
 brew_cask hammerspoon "/Applications/Hammerspoon.app" # config restored by update-config.sh
 brew_formula blueutil                                 # CLI Bluetooth control, used by ~/.hammerspoon/init.lua
+brew_formula nowplaying-cli                           # media pause/play, used by ~/.hammerspoon/init.lua
+
+# Metronome (App Store only, no Homebrew cask) — opened/closed alongside
+# GarageBand by ~/.hammerspoon/init.lua. Requires an App Store account
+# already signed in; mas can't do that step itself.
+brew_formula mas
+if [ -d "/Applications/Metronome.app" ]; then
+  echo "Metronome already installed."
+else
+  echo "Installing Metronome..."
+  mas install 1629209970
+fi
 
 # SidecarLauncher: CLI Sidecar connect/disconnect (no brew formula), used by
 # ~/.hammerspoon/init.lua. Uses private APIs, so it's pinned to a known-good
