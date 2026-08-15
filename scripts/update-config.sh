@@ -43,6 +43,14 @@ mkdir -p ~/.hammerspoon
 ln -sf "$CONFIG_DIR/hammerspoon/init.lua" ~/.hammerspoon/init.lua
 NEEDS_HAMMERSPOON_PERMISSIONS=1
 
+# Raycast script commands — Raycast has no CLI or plist hook to register a
+# Script Commands directory, so symlinking here only gets the files onto disk
+# at a stable path; adding that path in Raycast is still a manual one-time step.
+echo "Symlinking Raycast Hue scripts..."
+mkdir -p ~/.raycast/scripts
+ln -sfn "$CONFIG_DIR/raycast/hue-lights" ~/.raycast/scripts/hue-lights
+NEEDS_RAYCAST_SCRIPT_DIR=1
+
 # Karabiner config (copy instead of symlink — Karabiner rewrites this file and doesn't work with symlinks)
 echo "Copying Karabiner config..."
 mkdir -p ~/.config/karabiner
@@ -75,6 +83,13 @@ if [[ -n "$NEEDS_HAMMERSPOON_PERMISSIONS" ]]; then
   echo "ACTION NEEDED: grant Hammerspoon Accessibility and Bluetooth permission"
   echo "in System Settings > Privacy & Security (opening Bluetooth pane now)."
   open "x-apple.systempreferences:com.apple.preference.security?Privacy_Bluetooth" &>/dev/null
+fi
+
+if [[ -n "$NEEDS_RAYCAST_SCRIPT_DIR" ]]; then
+  echo ""
+  echo "ACTION NEEDED: add ~/.raycast/scripts/hue-lights as a Script Commands"
+  echo "directory in Raycast (Settings > Extensions > Script Commands > Add"
+  echo "Script Directory)."
 fi
 
 if [[ -z "$DOTFILES_QUIET" ]]; then
